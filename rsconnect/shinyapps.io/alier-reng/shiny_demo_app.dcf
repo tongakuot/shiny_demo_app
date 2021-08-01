@@ -1,0 +1,14 @@
+name: shiny_demo_app
+title: shiny_demo_app
+username:
+account: alier-reng
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4445232
+bundleId: 4877285
+url: https://alier-reng.shinyapps.io/shiny_demo_app/
+when: 1627831401.65643
+lastSyncTime: 1627831401.65644
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: www/jit_logo_2.png

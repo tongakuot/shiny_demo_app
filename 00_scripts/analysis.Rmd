@@ -1,0 +1,85 @@
+---
+title: "Analysis"
+author: "Alier Reng"
+date: "7/31/2021"
+output: html_document
+---
+
+## Set the Global Settings
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  message = FALSE,
+  warning = FALSE
+  )
+
+```
+
+## Transforming the South Sudan 2008 Census Data
+
+In this analysis, we clean, wrangle and transform the data for use in our Shiny demo app.
+
+### Import the desired packages
+
+```{r }
+library(tidyverse)
+library(vroom)
+```
+
+## Import the datasset
+
+In this chunk, we import the data and print the imported columns.
+
+```{r }
+# Import the dataset with the specified columns of interest
+ss_2008_census_data <- vroom('../00_data/ss_2008_census_data_raw.csv',
+                             col_select = c(`Region Name`, `Variable Name`, `Age Name`, `2008`))
+
+# Inspect the imported columns
+glimpse(ss_2008_census_data)
+```
+
+## Transform the data
+
+Here we clean and transform the dataset.
+
+```{r}
+# Subset the data
+ss_2008_census_data_tbl <- ss_2008_census_data %>% 
+  
+  # Rename the columns with the set_names() function
+  set_names(c("State", "Gender", "Age Category", "Population")) %>% 
+  
+  # Modify column values: split the gender column
+  separate(Gender,
+           into = c("Pop", "Gender", "other")) %>% 
+  
+  # Remove unwanted columns
+  select(-Pop, -other) %>% 
+  
+  # Exclude the total rows
+  filter(`Age Category` != "Total",
+         Gender         != "Total") %>% 
+  
+  # Change the Age Category classes
+  mutate(`Age Category` = fct_collapse(`Age Category`,
+    "0-14"  = c("0 to 4", "5 to 9", "10 to 14"),
+    "15-24" = c("15 to 19", "20 to 24"),
+    "25-34" = c("25 to 29", "30 to 34"),
+    "35-44" = c("35 to 39", "40 to 44"),
+    "45-54" = c("45 to 49", "50 to 54"),
+    "55-64" = c("55 to 59", "60 to 64"),
+    "65 +"  = "65+")) %>% 
+  
+  # Group by state, gender, and age category
+  group_by(State, Gender, `Age Category`) %>% 
+  summarize(Population = sum(Population),
+            
+            .groups    = "drop") 
+
+
+# Save the data as an rds file
+write_rds(ss_2008_census_data_tbl, "../00_data/ss_2008_census_data_tbl.rds")
+```
+
